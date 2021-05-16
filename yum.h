@@ -7,6 +7,7 @@
 
 using namespace std;
 
+//Matrix
 template <class Type>
 class Matrix{
     private:
@@ -20,6 +21,7 @@ class Matrix{
             col = 1;
             mat.push_back(vector<Type> (col,a));
         }
+        Matrix(){}
 
         //To 1*size col vector
         Matrix(vector<Type> colVector){
@@ -58,11 +60,27 @@ class Matrix{
             }   
         }
         //return type
-        Type operator()(int r,int n){
-            return mat[r][n];
+        Type operator()(int r,int c){
+            try{
+                if( r > row - 1  || r < 0 || c > col - 1  || c < 0   ){
+                throw "Matrix Error :index error : index beyond the dimension";
+                }
+            }catch(const char* msg){
+                cout<<msg<<endl;
+                exit(0);
+            }
+            return mat[r][c];
         }
         //return vector<type>
         vector<Type>& operator[](int r){
+            try{
+                if( r > row - 1  || r < 0  ){
+                throw "Matrix Error :index error : index beyond the dimension";
+                }
+            }catch(const char* msg){
+                cout<<msg<<endl;
+                exit(0);
+            }
             return mat[r];
         }
         // Transpose return Matrix
@@ -110,7 +128,7 @@ template <class Type>
 Matrix<Type> operator*(Matrix<Type> m1,Matrix<Type> m2){
     try{
         if(m1.col != m2.row){
-        throw "Matrix Error : Dimension error with their row or col";
+        throw "Matrix mulity Error : Dimension error with their row or col";
         }
     }catch(const char* msg){
         cout<<msg<<endl;
@@ -121,3 +139,71 @@ Matrix<Type> operator*(Matrix<Type> m1,Matrix<Type> m2){
     for(int i = 0 ; i < res.row ; i ++) for(int j = 0 ; j < res.col ; j ++) for (int k = 0 ; k < m1.col ; k ++) res[i][j] = res[i][j] + m1(i,k)*m2(k,j);
     return res;
 }
+
+//Matrix Calculation : 
+class MatrixCalculation{
+    public:
+    template <class Type>
+    static Matrix<Type> dot(Matrix<Type> m1,Matrix<Type> m2){
+        try{
+            if(m1.row != m2.row){
+            throw "Matrix dot Error : Dimension error with their row or col";
+            }
+        }catch(const char* msg){
+            cout<<msg<<endl;
+            exit(0);
+        }
+        return m1.transpose() * m2;
+    }
+    template <class Type>
+    static Type dotv(Matrix<Type> m1,Matrix<Type> m2){
+        try{
+            if(m1.row != m2.row || m1.col != 1 || m2.col != 1){
+            throw "Matrix dot Error : Dimension error with their row or col";
+            }
+        }catch(const char* msg){
+            cout<<msg<<endl;
+            exit(0);
+        }
+        Matrix<Type> res = m1.transpose() * m2;
+        return res(0,0);
+    }
+
+    //nature : used for test
+    template <class Type>
+    static Matrix<Type> nature(int r , int c){
+        Matrix<Type> res(r,c);
+        for(int i = 0 ; i < r ; i ++) for(int j = 0; j < c ; j ++) res[i][j] = 1 + c * i + j;
+        return res;
+    }
+
+    //eye(dimension) 
+    template <class Type>
+    static Matrix<Type> eye(int dimension){
+        Matrix<Type> res(dimension,dimension,Type(0));
+        for(int i = 0 ; i < dimension ; i ++) res[i][i] = Type(1);
+        return res;
+    }
+
+    //diag : row col must have one is 1;
+    template <class Type>
+    static Matrix<Type> diag(Matrix<Type> m){
+        try{
+            if(m.col != 1 && m.row != 1){
+                throw "Matrix diag Error : Dimension error with their row or col";
+            }
+        }catch(const char* msg){
+            cout<<msg<<endl;
+            exit(0);
+        } 
+        Matrix<Type> res;
+        if(m.col == 1){
+            res = Matrix<Type> (m.row,m.row);
+            for(int i = 0 ; i < m.row ; i ++) res[i][i] = m(i,0);
+        }else{
+            res = Matrix<Type> (m.col,m.col);
+            for(int i = 0 ; i < m.col ; i ++) res[i][i] = m(0,i);
+        }
+        return res;
+    }
+};
